@@ -7,8 +7,8 @@ gspGrouped* gspSwitch::firstInstance=nullptr;
 //nothing will happen with this.
 gspSwitch::gspSwitch()
 :gspGrouped() {
-	_callback_off = nullptr;
-	_callback_on = nullptr;
+	//_callback_off = nullptr;
+//	_callback_on = nullptr;
 	_strOn = nullptr;
 	_strOff = nullptr;
 	_switchMode = gspSwitch_MODE_UNCONFIGURED;
@@ -44,7 +44,7 @@ nonstd::function<void ()> cb_on, /*callback to invoke upon successful parse*/
 uint8_t mode)
 :gspGrouped() {
 	_callback_on = cb_on;
-	_callback_off = nullptr;
+//	_callback_off = nullptr;
 	_pin = pin;
 	pinMode(_pin, INPUT_PULLUP);
 	switch (mode) {

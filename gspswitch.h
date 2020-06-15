@@ -39,8 +39,8 @@ class gspSwitch:public gspGrouped
 
     static gspSwitch * makeOne(uint8_t _pin, 
         nonstd::function<void ()> cb1, /*callback to invoke upon successful parse*/
-	uint8_t mode=0) 
-	{
+	      uint8_t mode=0) 
+	  {
         gspSwitch * instance = new gspSwitch(_pin,cb1,mode);
         gspGrouped::register_instance(instance);
         return instance;
@@ -56,14 +56,14 @@ class gspSwitch:public gspGrouped
     }
 
     // constructors for 2-position toggle switches
-    gspSwitch(uint8_t , void (*)(), void (*)());
+    gspSwitch(uint8_t , nonstd::function<void ()> , nonstd::function<void ()> );
     gspSwitch(uint8_t , const char *, const char *);
 
     // constructors for momentary pushbutton switches
     // mode = 0 (default) for "activate once on release"
     // mode = 1 for "activate once on push"
     // mode = 2 for "activate continuously on push"
-    gspSwitch(uint8_t , void (*)(),uint8_t mode = 0);
+    gspSwitch(uint8_t , nonstd::function<void ()>,uint8_t mode = 0);
     gspSwitch(uint8_t , const char *,uint8_t mode = 0);
 
     // default constructor
