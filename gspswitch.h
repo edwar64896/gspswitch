@@ -2,6 +2,7 @@
 #define GSP_SWITCH
 
 #include "Arduino.h"
+#include "nonstd.h"
 #include "gspgrouped.h"
 
 #define gspSwitch_MODE_UNCONFIGURED 0
@@ -18,25 +19,37 @@ class gspSwitch:public gspGrouped
 {
   public:
 
-    static gspSwitch * makeOne(uint8_t _pin, void (*cb1)(), void (*cb2)()) {
+    static gspSwitch * makeOne(uint8_t _pin, 
+        nonstd::function<void ()> cb1, /*callback to invoke upon successful parse*/
+        nonstd::function<void ()> cb2) /*callback to invoke upon successful parse*/
+	{
         gspSwitch * instance = new gspSwitch(_pin,cb1,cb2);
         gspGrouped::register_instance(instance);
         return instance;
     }
 
-    static gspSwitch * makeOne(uint8_t _pin, const char * s1, const char * s2) {
+    static gspSwitch * makeOne(uint8_t _pin, 
+	const char * s1, 
+	const char * s2) 
+	{
         gspSwitch * instance = new gspSwitch(_pin,s1,s2);
         gspGrouped::register_instance(instance);
         return instance;
     }
 
-    static gspSwitch * makeOne(uint8_t _pin, void (*cb1)(),uint8_t mode=0) {
+    static gspSwitch * makeOne(uint8_t _pin, 
+        nonstd::function<void ()> cb1, /*callback to invoke upon successful parse*/
+	uint8_t mode=0) 
+	{
         gspSwitch * instance = new gspSwitch(_pin,cb1,mode);
         gspGrouped::register_instance(instance);
         return instance;
     }
 
-    static gspSwitch * makeOne(uint8_t _pin, const char * s1,uint8_t mode=0) {
+    static gspSwitch * makeOne(uint8_t _pin, 
+	const char * s1,
+	uint8_t mode=0) 
+	{
         gspSwitch * instance = new gspSwitch(_pin,s1,mode);
         gspGrouped::register_instance(instance);
         return instance;
@@ -81,8 +94,8 @@ class gspSwitch:public gspGrouped
 
     void debugPrint(int pin);
 
-    void (*_callback_off)() = nullptr;
-    void (*_callback_on)() = nullptr;
+    nonstd::function<void ()> _callback_off; /*callback to invoke upon successful parse*/
+    nonstd::function<void ()> _callback_on; /*callback to invoke upon successful parse*/
     const char* _strOff = nullptr;
     const char* _strOn = nullptr;
     uint8_t _pin=0;

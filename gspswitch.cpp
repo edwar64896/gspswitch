@@ -16,7 +16,9 @@ gspSwitch::gspSwitch()
 
 //2-way toggle switch constructor
 //with callbacks
-gspSwitch::gspSwitch(uint8_t pin, void (*cb_off)(), void (*cb_on)())
+gspSwitch::gspSwitch(uint8_t pin, 
+nonstd::function<void ()> cb_off, /*callback to invoke upon successful parse*/
+nonstd::function<void ()> cb_on) /*callback to invoke upon successful parse*/
 :gspGrouped() {
 	_callback_off = cb_off;
 	_callback_on = cb_on;
@@ -37,7 +39,9 @@ gspSwitch::gspSwitch(uint8_t pin, const char * strOff, const char * strOn)
 
 //pushbutton constructor
 //with callback
-gspSwitch::gspSwitch(uint8_t pin, void (*cb_on)(), uint8_t mode)
+gspSwitch::gspSwitch(uint8_t pin, 
+nonstd::function<void ()> cb_on, /*callback to invoke upon successful parse*/
+uint8_t mode)
 :gspGrouped() {
 	_callback_on = cb_on;
 	_callback_off = nullptr;
