@@ -18,23 +18,44 @@ gspSwitch::gspSwitch()
 //with callbacks
 gspSwitch::gspSwitch(uint8_t pin, 
 nonstd::function<void ()> cb_off, /*callback to invoke upon successful parse*/
-nonstd::function<void ()> cb_on) /*callback to invoke upon successful parse*/
+nonstd::function<void ()> cb_on, /*callback to invoke upon successful parse*/
+uint8_t mode=0)
 :gspGrouped() {
 	_callback_off = cb_off;
 	_callback_on = cb_on;
 	_pin = pin;
 	pinMode(_pin, INPUT_PULLUP);
-	_switchMode = gspSwitch_MODE_SWITCH_CB;
+	switch (mode) {
+		case 0:
+			_switchMode = gspSwitch_MODE_SWITCH_CB;
+			break;
+		case 1:
+			_switchMode = gspSwitch_MODE_PUSHBUTTON_LATCH_CB;
+			break;
+		default:
+			_switchMode = gspSwitch_MODE_UNCONFIGURED;
+		break;
+	}
 }
 
 //2-way toggle switch constructor with strings
-gspSwitch::gspSwitch(uint8_t pin, const char * strOff, const char * strOn)
+gspSwitch::gspSwitch(uint8_t pin, const char * strOff, const char * strOn,uint8_t mode = 0)
 :gspGrouped() {
 	_strOff = strOff;
 	_strOn = strOn;
 	_pin = pin;
 	pinMode(_pin, INPUT_PULLUP);
-	_switchMode = gspSwitch_MODE_SWITCH_STR;
+	switch (mode) {
+		case 0:
+			_switchMode = gspSwitch_MODE_SWITCH_STR;
+			break;
+		case 1:
+			_switchMode = gspSwitch_MODE_PUSHBUTTON_LATCH_STR;
+			break;
+		default:
+			_switchMode = gspSwitch_MODE_UNCONFIGURED;
+		break;
+	}
 }
 
 //pushbutton constructor
@@ -48,14 +69,14 @@ uint8_t mode)
 	_pin = pin;
 	pinMode(_pin, INPUT_PULLUP);
 	switch (mode) {
+		case 0:
+			_switchMode = gspSwitch_MODE_PUSHBUTTON_RELEASE_CB;
+			break;
 		case 1:
 			_switchMode = gspSwitch_MODE_PUSHBUTTON_PUSH_CB;
 			break;
 		case 2:
 			_switchMode = gspSwitch_MODE_PUSHBUTTON_CONTINUOUS_CB;
-			break;
-		case 0:
-			_switchMode = gspSwitch_MODE_PUSHBUTTON_RELEASE_CB;
 			break;
 		default:
 			_switchMode = gspSwitch_MODE_UNCONFIGURED;
@@ -71,14 +92,14 @@ gspSwitch::gspSwitch(uint8_t pin, const char * strOn, uint8_t mode)
 	_pin = pin;
 	pinMode(_pin, INPUT_PULLUP);
 	switch (mode) {
+		case 0:
+			_switchMode = gspSwitch_MODE_PUSHBUTTON_RELEASE_STR;
+			break;
 		case 1:
 			_switchMode = gspSwitch_MODE_PUSHBUTTON_PUSH_STR;
 			break;
 		case 2:
 			_switchMode = gspSwitch_MODE_PUSHBUTTON_CONTINUOUS_STR;
-			break;
-		case 0:
-			_switchMode = gspSwitch_MODE_PUSHBUTTON_RELEASE_STR;
 			break;
 		default:
 			_switchMode = gspSwitch_MODE_UNCONFIGURED;
@@ -177,7 +198,7 @@ bool gspSwitch::check() {
 			_switchState=gspSwitch::Off;
 
 			//debounce
-			if (_s1count++>1024) {
+			if (_s1count++>gspSwitch_DEBOUNCE_COUNT) {
 				_s1 = 0;
 				_s1count=0;
 			}
@@ -196,7 +217,51 @@ bool gspSwitch::check() {
 			_switchState=gspSwitch::Off;
 
 			//debounce
-			if (_s1count++>1024) {
+			if (_s1count++>gspSwitch_DEBOUNCE_COUNT) {
+				_s1 = 0;
+				_s1count=0;
+			}
+		}
+		break;
+	case gspSwitch_MODE_PUSHBUTTON_LATCH_CB:
+		if (!drVal) {
+			_s1count=0;
+			if (!_s1) {
+				if (_switchState==gspSwitch::On) {
+					_switchState=gspSwitch::Off;
+					_callback_off();
+				} else {
+					_switchState=gspSwitch::On;				
+					_callback_on();
+				}
+				debugPrint(_pin);	
+				_s1=1;
+			}
+		} else {
+			//debounce
+			if (_s1count++>gspSwitch_DEBOUNCE_COUNT) {
+				_s1 = 0;
+				_s1count=0;
+			}
+		}
+		break;
+	case gspSwitch_MODE_PUSHBUTTON_LATCH_STR:
+		if (!drVal) {
+			_s1count=0;
+			if (!_s1) {
+				if (_switchState==gspSwitch::On) {
+					_switchState=gspSwitch::Off;
+					Serial.println(_strOff);
+				} else {
+					_switchState=gspSwitch::On;				
+					Serial.println(_strOn);
+				}
+				debugPrint(_pin);	
+				_s1=1;
+			}
+		} else {
+			//debounce
+			if (_s1count++>gspSwitch_DEBOUNCE_COUNT) {
 				_s1 = 0;
 				_s1count=0;
 			}
