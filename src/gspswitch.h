@@ -85,8 +85,6 @@ class gspSwitch:public gspGrouped
       On
     };
 
-
-
     static void checkAll() {
       gspGrouped::checkAll(gspSwitch::firstInstance);
     }

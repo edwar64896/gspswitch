@@ -143,10 +143,10 @@ bool gspSwitch::check() {
 		if (drVal != _old_s1) {
 			debugPrint(_pin);	
 			if (drVal) {
-				Serial.println(_strOff);
+				gspGrouped::gspStream.println(_strOff);
 				_switchState=gspSwitch::Off;
 			} else {
-				Serial.println(_strOn);
+				gspGrouped::gspStream.println(_strOn);
 				_switchState=gspSwitch::On;
 			}
 			_old_s1 = drVal;
@@ -181,7 +181,7 @@ bool gspSwitch::check() {
 
 		if (_s1 == 0 && _s2) {
 			debugPrint(_pin);	
-			Serial.println(_strOn);
+			gspGrouped::gspStream.println(_strOn);
 			_s2 = 0;
 		}
 		break;
@@ -210,7 +210,7 @@ bool gspSwitch::check() {
 			if (!_s1) {
 				_switchState=gspSwitch::On;
 				debugPrint(_pin);	
-				Serial.println(_strOn);
+				gspGrouped::gspStream.println(_strOn);
 				_s1=1;
 			}
 		} else {
@@ -251,10 +251,10 @@ bool gspSwitch::check() {
 			if (!_s1) {
 				if (_switchState==gspSwitch::On) {
 					_switchState=gspSwitch::Off;
-					Serial.println(_strOff);
+					gspGrouped::gspStream.println(_strOff);
 				} else {
 					_switchState=gspSwitch::On;				
-					Serial.println(_strOn);
+					gspGrouped::gspStream.println(_strOn);
 				}
 				debugPrint(_pin);	
 				_s1=1;
@@ -280,7 +280,7 @@ bool gspSwitch::check() {
 		if (!drVal) {
 			debugPrint(_pin);	
 			_switchState=gspSwitch::On;
-			Serial.println(_strOn);
+			gspGrouped::gspStream.println(_strOn);
 		} else {
 			_switchState=gspSwitch::Off;
 		}

@@ -5,61 +5,79 @@
 This class handles two-way toggle switches and momentary pushbutton switches in arduino and embedded systems with minimal code requirements.
 
 ## Purpose
-The purpose of the class is to simplify the use of callback function or serial communications when switches or buttons are used.
-A "Callback function" is simply a block of code that is executed when an action occurs within the code.
+The aim of this series of libraries is to massively simplify the coding requirements for arduino implementations.
 
 ## How to use this
-To use this class, you instantiate it using one of four constructor options depending on whether you wish to use callbacks or strings,
+To use this class, you instantiate it using one of a number of constructor options depending on whether you wish to use function callbacks or strings,
 and whether you are using pushbuttons or toggle switches.
 
+### Callbacks
+A "Callback" function is a stand-alone function that is only called when a particular action or event happens in your code. For instance, the function:
+
+```
+void turnOn() {
+  // actions to take if your switch state is changed to "on"
+}
+
+void turnOff() {
+  // actions to take if your switch state is changed to "off"
+}
+```
+This can be implemented simply by defining a "gspswitch", identifying the digital pin associated with the switch, and specifying the callback functions you are going to use. 
+Aside from this, there are minimal additional coding requirements...
+
+```
+gspSwitch mySwitch(12,turnOff,turnOn);
+
+```
+
+### Strings
+
+If you define your switches with "strings" (instead of callback functions) the defined strings will be sent across the serial communications interface when the defined events occur.
+
+```
+gspSwitch mySwitchWithStrings(12,"I was turned Off","I was turned On");
 
 This is the format of the constructor when using serial strings on a two-way toggle switch.
-When the switch is turned off, the string "Switch is Off" will be printed on the serial comms interface.
-When the switch is turned on, the string "Switch is On" will be printed on the serial comms interface.
+When the switch is turned off, the string "I was turned Off" will be printed on the serial comms interface.
+When the switch is turned on, the string "I was turned On" will be printed on the serial comms interface.
 the first parameter indicates the pin that will be used for the switch. It is assumed that the internal pullup resistor will be used.
 ```
 gspSwitch myToggleSwitch(1,"Switch is Off","Switch is On");
 ```
-another option is to use callbacks. Callbacks give you more flexibility in the actions that can be performed.
-Here is an example of exactly the same output, but using callbacks:
 
-```
-void myToggleSwitchGoesOff() {
-  Serial.println("Switch is Off");
-}
-void myToggleSwitchGoesOn() {
-  Serial.println("Switch is On");
-}
-
-gspSwitch myToggleSwitch(1,myToggleSwitchGoesOff,myToggleSwitchGoesOn);
-```
-
-The constructors for momentary pushbutton operation are similar, only taking a single string or callback function as a parameter.
-
-```
-gspSwitch myPushButton(2,"Button was pushed");
-```
-... or with a callback:
-```
-void myButtonWasPushed() {
-  Serial.println("You pushed my button.");
-}
-gspSwitch myPushButton(2,myButtonWasPushed);
-```
+### Coding Requirements
 
 The only requirements for using this library are to 
-   * include the library header file, 
+   * include the library header file #include <gspswitch.h>
    * to start up the Serial comms interface and to 
    * register the instance in setup()
    * put a line of code somewhere in the "loop()" function:
 ```
+
+/*
+ * This is the requried header file
+ */ 
+
 #include "gspswitch.h"
+
+/*
+ * Here is where we define the switch instances.
+ *
+ * gspswitch <variablename>(<pin>,<off_callback>,<on_callback>);
+ *   ...or...
+ * gspswitch <variablename>(<pin>,"Off Event STring To Send","On Event String to Send");
+ */
 
 gspSwitch myToggleSwitch(1,"Switch is Off","Switch is On");
 gspSwitch myOtherToggleSwitch(1,"Switch is Off","Switch is On");
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(115200); // turn on the serial interface
+
+  /*
+   * Register the switch instances with gspGrouped
+   */
   gspGrouped::register_instance(&myToggleSwitch); // you need one of these for each gspSwitch
   gspGrouped::register_instance(&myOtherToggleSwitch); // you need one of these for each gspSwitch
 }
@@ -67,7 +85,10 @@ void setup() {
 void loop() {
 
 ...
-  
+
+  /*
+   * Check all the switches. Only one line required.
+   */
   gspSwitch.checkAll(); //<< This is the only other line of code required in the app.
 
 ...
@@ -76,6 +97,7 @@ void loop() {
 
 ```
 ## Pushbutton modes
+
 The pushbutton operational modes are configured in the last parameter of the constructor.
 The default mode is "Activate on release". Other optional modes are "Activate once on push" or "Activate continuously on push".
 
