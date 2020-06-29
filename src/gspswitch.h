@@ -16,6 +16,15 @@
 #define gspSwitch_MODE_PUSHBUTTON_CONTINUOUS_STR 8
 #define gspSwitch_MODE_PUSHBUTTON_LATCH_CB 9
 #define gspSwitch_MODE_PUSHBUTTON_LATCH_STR 10
+#define gspSwitch_MODE_PUSHBUTTON_TIMEBASED_CB 11
+#define gspSwitch_MODE_PUSHBUTTON_TIMEBASED_STR 12
+#define gspSwitch_MODE_PUSHBUTTON_TIMEBASED2_CB 13
+#define gspSwitch_MODE_PUSHBUTTON_TIMEBASED2_STR 14
+
+#define _SW_BAND_1  1024
+#define _SW_BAND_2  16384
+#define _SW_BAND_3  32768
+
 
 #define gspSwitch_DEBOUNCE_COUNT 1024
     
@@ -51,9 +60,9 @@ class gspSwitch:public gspGrouped
     }
 
     static gspSwitch * makeOne(uint8_t _pin, 
-	const char * s1,
-	uint8_t mode=0) 
-	{
+	      const char * s1,
+        uint8_t mode=0) 
+    {
         gspSwitch * instance = new gspSwitch(_pin,s1,mode);
         gspGrouped::register_instance(instance);
         return instance;
@@ -62,15 +71,54 @@ class gspSwitch:public gspGrouped
     // constructors for 2-position toggle switches
     // mode = 0 (default) -> two position switch
     // mode = 1 -> latching pushbutton
-    gspSwitch(uint8_t , nonstd::function<void ()> , nonstd::function<void ()>,uint8_t mode = 0 );
-    gspSwitch(uint8_t , const char *, const char *,uint8_t mode = 0);
+    //
+    // params: 
+    //    1 - on action
+    //    2 - off action
+    //    3 - mode
+    gspSwitch(uint8_t, nonstd::function<void ()>, nonstd::function<void ()>, uint8_t mode = 0 );
+    gspSwitch(uint8_t, const char *, const char *,uint8_t mode = 0);
 
     // constructors for momentary pushbutton switches
     // mode = 0 (default) for "activate once on release"
     // mode = 1 for "activate once on push"
     // mode = 2 for "activate continuously on push"
-    gspSwitch(uint8_t , nonstd::function<void ()>,uint8_t mode = 0);
-    gspSwitch(uint8_t , const char *,uint8_t mode = 0);
+    //
+    // params: 
+    //    1 - activation action
+    //    2 - mode
+    gspSwitch(uint8_t, nonstd::function<void ()>,uint8_t mode = 0);
+    gspSwitch(uint8_t, const char *,uint8_t mode = 0);
+
+    // mode 3 pushbutton - this is an "activate on release" mode that allows 
+    // use of a pushbutton based on how long the button was down for.
+    //
+    // on/off - very short momentary pushbutton action
+    // alternate mode 1 - button is depressed for 1 second or longer
+    //
+    // params: 
+    //    1 - on action
+    //    2 - off action
+    //    3 - long depress action
+    gspSwitch(uint8_t, nonstd::function<void ()>, nonstd::function<void ()>, nonstd::function<void ()>);
+    gspSwitch(uint8_t, const char *, const char *, const char *);    
+
+
+    // mode 4 pushbutton - this is an "activate on release" mode that allows 
+    // use of a pushbutton based on how long the button was down for.
+    //
+    // on/off - very short momentary pushbutton action
+    // alternate action 1 - button is depressed for 1 second or longer
+    // alternate action 2 - button is depressed for 2 second or longer
+    //
+    // params: 
+    //    1 - on action
+    //    2 - off action
+    //    3 - long depress action
+    //    4 - very long depress action
+    gspSwitch(uint8_t, nonstd::function<void ()>, nonstd::function<void ()>, nonstd::function<void ()>, nonstd::function<void ()>);
+    gspSwitch(uint8_t, const char *, const char *, const char *, const char *);    
+
 
     // default constructor
     gspSwitch();
@@ -82,7 +130,9 @@ class gspSwitch:public gspGrouped
 
     enum state {
       Off=0,
-      On
+      On,
+      Mode1,
+      Mode2
     };
 
     static void checkAll() {
@@ -100,13 +150,18 @@ class gspSwitch:public gspGrouped
 
     nonstd::function<void ()> _callback_off; /*callback to invoke upon successful parse*/
     nonstd::function<void ()> _callback_on; /*callback to invoke upon successful parse*/
+    nonstd::function<void ()> _callback_depress; /*callback to invoke upon successful parse*/
+    nonstd::function<void ()> _callback_depress2; /*callback to invoke upon successful parse*/
     const char* _strOff = nullptr;
     const char* _strOn = nullptr;
+    const char* _strDepress = nullptr;
+    const char* _strDepress2 = nullptr;
     uint8_t _pin=0;
     int _old_s1 = -1;
     int _s1=0;
     int _s1count=0;
     int _s2=0;
+    uint32_t _s3=0;
     int _switchMode=gspSwitch_MODE_UNCONFIGURED;
 
     uint8_t _switchState=gspSwitch::Off;

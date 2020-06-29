@@ -46,6 +46,63 @@ the first parameter indicates the pin that will be used for the switch. It is as
 gspSwitch myToggleSwitch(1,"Switch is Off","Switch is On");
 ```
 
+### Constructors
+```
+
+    // constructors for 2-position toggle switches
+    // mode = 0 (default) -> two position switch
+    // mode = 1 -> latching pushbutton
+    //
+    // params: 
+    //    1 - on action
+    //    2 - off action
+    //    3 - mode
+    gspSwitch(uint8_t, nonstd::function<void ()>, nonstd::function<void ()>, uint8_t mode = 0 );
+    gspSwitch(uint8_t, const char *, const char *,uint8_t mode = 0);
+
+    // constructors for momentary pushbutton switches
+    // mode = 0 (default) for "activate once on release"
+    // mode = 1 for "activate once on push"
+    // mode = 2 for "activate continuously on push"
+    //
+    // params: 
+    //    1 - activation action
+    //    2 - mode
+    gspSwitch(uint8_t, nonstd::function<void ()>,uint8_t mode = 0);
+    gspSwitch(uint8_t, const char *,uint8_t mode = 0);
+
+    // mode 3 pushbutton - this is an "activate on release" mode that allows 
+    // use of a pushbutton based on how long the button was down for.
+    //
+    // on/off - very short momentary pushbutton action
+    // alternate mode 1 - button is depressed for 1 second or longer
+    //
+    // params: 
+    //    1 - on action
+    //    2 - off action
+    //    3 - long depress action
+    gspSwitch(uint8_t, nonstd::function<void ()>, nonstd::function<void ()>, nonstd::function<void ()>);
+    gspSwitch(uint8_t, const char *, const char *, const char *);    
+
+
+    // mode 4 pushbutton - this is an "activate on release" mode that allows 
+    // use of a pushbutton based on how long the button was down for.
+    //
+    // on/off - very short momentary pushbutton action
+    // alternate action 1 - button is depressed for 1 second or longer
+    // alternate action 2 - button is depressed for 2 second or longer
+    //
+    // params: 
+    //    1 - on action
+    //    2 - off action
+    //    3 - long depress action
+    //    4 - very long depress action
+    gspSwitch(uint8_t, nonstd::function<void ()>, nonstd::function<void ()>, nonstd::function<void ()>, nonstd::function<void ()>);
+    gspSwitch(uint8_t, const char *, const char *, const char *, const char *);  
+
+
+```
+
 ### Coding Requirements
 
 The only requirements for using this library are to 

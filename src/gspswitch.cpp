@@ -17,8 +17,8 @@ gspSwitch::gspSwitch()
 //2-way toggle switch constructor
 //with callbacks
 gspSwitch::gspSwitch(uint8_t pin, 
-nonstd::function<void ()> cb_off, /*callback to invoke upon successful parse*/
 nonstd::function<void ()> cb_on, /*callback to invoke upon successful parse*/
+nonstd::function<void ()> cb_off, /*callback to invoke upon successful parse*/
 uint8_t mode=0)
 :gspGrouped() {
 	_callback_off = cb_off;
@@ -39,7 +39,7 @@ uint8_t mode=0)
 }
 
 //2-way toggle switch constructor with strings
-gspSwitch::gspSwitch(uint8_t pin, const char * strOff, const char * strOn,uint8_t mode = 0)
+gspSwitch::gspSwitch(uint8_t pin, const char * strOn, const char * strOff,uint8_t mode = 0)
 :gspGrouped() {
 	_strOff = strOff;
 	_strOn = strOn;
@@ -105,6 +105,66 @@ gspSwitch::gspSwitch(uint8_t pin, const char * strOn, uint8_t mode)
 			_switchMode = gspSwitch_MODE_UNCONFIGURED;
 			break;
 	}
+}
+
+
+gspSwitch::gspSwitch(uint8_t pin, 
+	nonstd::function<void ()> cb_on, 
+	nonstd::function<void ()> cb_off, 
+	nonstd::function<void ()> cb_depress)
+	:gspGrouped()  {
+		_pin = pin;
+		pinMode(_pin, INPUT_PULLUP);
+		_switchMode=gspSwitch_MODE_PUSHBUTTON_TIMEBASED_CB;
+		_callback_on=cb_on;
+		_callback_off=cb_off;
+		_callback_depress=cb_depress;
+}
+
+
+gspSwitch::gspSwitch(uint8_t pin, 
+	const char * strOn, 
+	const char * strOff, 
+	const char * strDepress)
+	:gspGrouped() {
+		_pin = pin;
+		pinMode(_pin, INPUT_PULLUP);
+		_switchMode=gspSwitch_MODE_PUSHBUTTON_TIMEBASED_STR;
+		_strOn=strOn;
+		_strOff=strOff;
+		_strDepress=strDepress;
+
+}
+
+gspSwitch::gspSwitch(uint8_t pin, 
+	nonstd::function<void ()> cb_on, 
+	nonstd::function<void ()> cb_off, 
+	nonstd::function<void ()> cb_depress, 
+	nonstd::function<void ()> cb_depress2)
+	:gspGrouped()  {
+		_pin = pin;
+		pinMode(_pin, INPUT_PULLUP);
+		_switchMode=gspSwitch_MODE_PUSHBUTTON_TIMEBASED2_CB;
+		_callback_on=cb_on;
+		_callback_off=cb_off;
+		_callback_depress=cb_depress;
+		_callback_depress2=cb_depress2;
+}
+
+
+gspSwitch::gspSwitch(uint8_t pin, 
+	const char * strOn, 
+	const char * strOff, 
+	const char * strDepress,
+	const char * strDepress2)
+	:gspGrouped() {
+		_pin = pin;
+		pinMode(_pin, INPUT_PULLUP);
+		_switchMode=gspSwitch_MODE_PUSHBUTTON_TIMEBASED2_STR;
+		_strOn=strOn;
+		_strOff=strOff;
+		_strDepress=strDepress;
+		_strDepress2=strDepress2; 
 }
 
 gspSwitch::~gspSwitch() {}
@@ -283,6 +343,132 @@ bool gspSwitch::check() {
 			gspGrouped::gspStream.println(_strOn);
 		} else {
 			_switchState=gspSwitch::Off;
+		}
+		break;
+	case gspSwitch_MODE_PUSHBUTTON_TIMEBASED_CB:
+		if (!drVal) {
+			_s1 = 1;
+			_s2 = 1;
+			_s3++;
+		} else {
+			_s1 = 0;
+		}
+
+		if (_s1 == 0 && _s2) {
+			debugPrint(_pin);	
+			if (_s3 >= _SW_BAND_2) {
+					_switchState=gspSwitch::Mode1;
+					_callback_depress();
+			} else if (_s3 >= _SW_BAND_1) {
+				if (_switchState!=gspSwitch::Off)
+				{
+					_switchState=gspSwitch::Off;
+					_callback_off();
+				}
+				else if (_switchState==gspSwitch::Off)
+				{
+					_switchState=gspSwitch::On;
+					_callback_on();
+				}
+			}
+			_s3 = 0;
+			_s2 = 0;
+		}
+		break;
+	case gspSwitch_MODE_PUSHBUTTON_TIMEBASED_STR:
+		if (!drVal) {
+			_s1 = 1;
+			_s2 = 1;
+			_s3++;
+		} else {
+			_s1 = 0;
+		}
+
+		if (_s1 == 0 && _s2) {
+			debugPrint(_pin);	
+			if (_s3 >= _SW_BAND_2) {
+					_switchState=gspSwitch::Mode1;
+					gspGrouped::gspStream.println(_strDepress);
+			} else if (_s3 >= _SW_BAND_1) {
+				if (_switchState!=gspSwitch::Off)
+				{
+					_switchState=gspSwitch::Off;
+					gspGrouped::gspStream.println(_strOff);
+				}
+				else if (_switchState==gspSwitch::Off)
+				{
+					_switchState=gspSwitch::On;
+					gspGrouped::gspStream.println(_strOn);
+				}
+			}
+			_s3 = 0;
+			_s2 = 0;
+		}
+		break;
+	case gspSwitch_MODE_PUSHBUTTON_TIMEBASED2_CB:
+		if (!drVal) {
+			_s1 = 1;
+			_s2 = 1;
+			_s3++;
+		} else {
+			_s1 = 0;
+		}
+
+		if (_s1 == 0 && _s2) {
+			debugPrint(_pin);	
+			if (_s3 >= _SW_BAND_3) {
+					_switchState=gspSwitch::Mode2;
+					_callback_depress2();
+			} else if (_s3 >= _SW_BAND_2) {
+					_switchState=gspSwitch::Mode1;
+					_callback_depress();
+			} else if (_s3 >= _SW_BAND_1) {
+				if (_switchState!=gspSwitch::Off)
+				{
+					_switchState=gspSwitch::Off;
+					_callback_off();
+				}
+				else if (_switchState==gspSwitch::Off)
+				{
+					_switchState=gspSwitch::On;
+					_callback_on();
+				}
+			}
+			_s3 = 0;
+			_s2 = 0;
+		}
+		break;
+	case gspSwitch_MODE_PUSHBUTTON_TIMEBASED2_STR:
+		if (!drVal) {
+			_s1 = 1;
+			_s2 = 1;
+			_s3++;
+		} else {
+			_s1 = 0;
+		}
+
+		if (_s1 == 0 && _s2) {
+			debugPrint(_pin);	
+			if (_s3 >= _SW_BAND_3) {
+					_switchState=gspSwitch::Mode2;
+					gspGrouped::gspStream.println(_strDepress2);
+			} else if (_s3 >= _SW_BAND_2) {
+					_switchState=gspSwitch::Mode1;
+					gspGrouped::gspStream.println(_strDepress);
+			} else if (_s3 >= _SW_BAND_1) {
+				if (_switchState!=gspSwitch::Off)
+				{
+					_switchState=gspSwitch::Off;
+					gspGrouped::gspStream.println(_strOff);
+				}
+				else if (_switchState==gspSwitch::Off)
+				{
+					_switchState=gspSwitch::On;
+					gspGrouped::gspStream.println(_strOn);
+				}
+			}
+			_s3 = 0;
+			_s2 = 0;
 		}
 		break;
 	default:
