@@ -12,14 +12,14 @@
     "repository":
     {
         "type": "git",
-        "url": "https://github.com/edwar64896/gspswitch#0.2"
+        "url": "https://github.com/edwar64896/gspswitch#v0.2"
     },
     "frameworks": "arduino",
     "platforms": "atmelavr",
     "dependencies": [
         {
             "name":"gspgrouped",
-            "version":"https://github.com/edwar64896/gspgrouped#0.1"
+            "version":"https://github.com/edwar64896/gspgrouped#v0.2"
         },
         {
             "name":"functional-avr",
