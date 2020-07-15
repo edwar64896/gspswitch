@@ -167,6 +167,47 @@ gspSwitch::gspSwitch(uint8_t pin,
 		_strDepress2=strDepress2; 
 }
 
+
+gspSwitch::gspSwitch(uint8_t pin, 
+	uint8_t maxStates,
+	nonstd::function<void (uint8_t)> cb_changestate,
+	uint8_t mode = gspSwitch_MODE_PUSHBUTTON_RELEASE_COUNTER_MANUALRESET_CB) {
+		_pin = pin;
+		pinMode(_pin, INPUT_PULLUP);
+		_switchMode = mode;
+		_maxCounter = maxStates;
+		_callback_changestate = cb_changestate;
+}
+    
+    //resets the counter - only valid with this mode/constructor
+void gspSwitch::counterReset() {
+	if (_switchMode == gspSwitch_MODE_PUSHBUTTON_RELEASE_COUNTER_MANUALRESET_CB || _switchMode == gspSwitch_MODE_PUSHBUTTON_RELEASE_COUNTER_AUTORESET_CB ) {
+		if (_counter!=0) {
+			_counter=0;
+			_callback_changestate(_counter);
+		}
+	}
+}
+
+void gspSwitch::counterIncrement() {
+	if (_switchMode == gspSwitch_MODE_PUSHBUTTON_RELEASE_COUNTER_MANUALRESET_CB || _switchMode == gspSwitch_MODE_PUSHBUTTON_RELEASE_COUNTER_AUTORESET_CB ) {
+		_counter = (_counter + 1) % (_maxCounter +1);
+		_callback_changestate(_counter);
+	}
+}
+
+uint8_t gspSwitch::getCounterValue() {
+	if (_switchMode == gspSwitch_MODE_PUSHBUTTON_RELEASE_COUNTER_MANUALRESET_CB || _switchMode == gspSwitch_MODE_PUSHBUTTON_RELEASE_COUNTER_AUTORESET_CB ) {
+		return _counter;
+	} else {
+		return 0;
+	}
+}
+
+void gspSwitch::counterAutoResetHoldoff() {
+	_autoResetCounter=0;
+}
+
 gspSwitch::~gspSwitch() {}
 
 uint8_t gspSwitch::getState() {
@@ -212,23 +253,43 @@ bool gspSwitch::check() {
 			_old_s1 = drVal;
 		}
 		break;
+
+	case gspSwitch_MODE_PUSHBUTTON_RELEASE_COUNTER_MANUALRESET_CB:
+	case gspSwitch_MODE_PUSHBUTTON_RELEASE_COUNTER_AUTORESET_CB:
 	case gspSwitch_MODE_PUSHBUTTON_RELEASE_CB:
+
 		if (!drVal) {
-			_s1 = 1;
-			_s2 = 1;
+
+			_s1 = 1; _s2 = 1;
 			_switchState=gspSwitch::On;
 
 		} else {
+
 			_s1 = 0;
 			_switchState=gspSwitch::Off;
+			if (_switchMode == gspSwitch_MODE_PUSHBUTTON_RELEASE_COUNTER_AUTORESET_CB && _counter) {
+				if (_autoResetCounter++ > gspSwitch_AUTORESET_CAP) {
+					counterReset();
+					_autoResetCounter=0;
+				}
+			}
 		}
 
 		if (_s1 == 0 && _s2) {
+
 			debugPrint(_pin);	
-			_callback_on();
+			if (_switchMode == gspSwitch_MODE_PUSHBUTTON_RELEASE_CB) {
+				_callback_on();
+			}
+			if (_switchMode == gspSwitch_MODE_PUSHBUTTON_RELEASE_COUNTER_MANUALRESET_CB || _switchMode == gspSwitch_MODE_PUSHBUTTON_RELEASE_COUNTER_AUTORESET_CB) {
+				counterIncrement();				
+			}
+
 			_s2 = 0;
+
 		}
 		break;
+
 	case gspSwitch_MODE_PUSHBUTTON_RELEASE_STR:
 		if (!drVal) {
 			_s1 = 1;
@@ -245,6 +306,7 @@ bool gspSwitch::check() {
 			_s2 = 0;
 		}
 		break;
+
 	case gspSwitch_MODE_PUSHBUTTON_PUSH_CB:
 		if (!drVal) {
 			_s1count=0;
@@ -264,6 +326,7 @@ bool gspSwitch::check() {
 			}
 		}
 		break;
+
 	case gspSwitch_MODE_PUSHBUTTON_PUSH_STR:
 		if (!drVal) {
 			_s1count=0;
@@ -283,6 +346,7 @@ bool gspSwitch::check() {
 			}
 		}
 		break;
+
 	case gspSwitch_MODE_PUSHBUTTON_LATCH_CB:
 		if (!drVal) {
 			_s1count=0;
@@ -305,6 +369,7 @@ bool gspSwitch::check() {
 			}
 		}
 		break;
+
 	case gspSwitch_MODE_PUSHBUTTON_LATCH_STR:
 		if (!drVal) {
 			_s1count=0;
@@ -327,6 +392,7 @@ bool gspSwitch::check() {
 			}
 		}
 		break;
+
 	case gspSwitch_MODE_PUSHBUTTON_CONTINUOUS_CB:
 		if (!drVal) {
 			debugPrint(_pin);	
@@ -336,6 +402,7 @@ bool gspSwitch::check() {
 			_switchState=gspSwitch::Off;			
 		}
 		break;
+
 	case gspSwitch_MODE_PUSHBUTTON_CONTINUOUS_STR:
 		if (!drVal) {
 			debugPrint(_pin);	
@@ -345,6 +412,7 @@ bool gspSwitch::check() {
 			_switchState=gspSwitch::Off;
 		}
 		break;
+
 	case gspSwitch_MODE_PUSHBUTTON_TIMEBASED_CB:
 		if (!drVal) {
 			_s1 = 1;
@@ -375,6 +443,7 @@ bool gspSwitch::check() {
 			_s2 = 0;
 		}
 		break;
+
 	case gspSwitch_MODE_PUSHBUTTON_TIMEBASED_STR:
 		if (!drVal) {
 			_s1 = 1;
