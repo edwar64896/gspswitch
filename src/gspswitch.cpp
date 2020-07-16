@@ -183,6 +183,7 @@ gspSwitch::gspSwitch(uint8_t pin,
 void gspSwitch::counterReset() {
 	if (_switchMode == gspSwitch_MODE_PUSHBUTTON_RELEASE_COUNTER_MANUALRESET_CB || _switchMode == gspSwitch_MODE_PUSHBUTTON_RELEASE_COUNTER_AUTORESET_CB ) {
 		if (_counter!=0) {
+			_autoResetCounter=0;
 			_counter=0;
 			_callback_changestate(_counter);
 		}
@@ -191,6 +192,7 @@ void gspSwitch::counterReset() {
 
 void gspSwitch::counterIncrement() {
 	if (_switchMode == gspSwitch_MODE_PUSHBUTTON_RELEASE_COUNTER_MANUALRESET_CB || _switchMode == gspSwitch_MODE_PUSHBUTTON_RELEASE_COUNTER_AUTORESET_CB ) {
+		_autoResetCounter=0;
 		_counter = (_counter + 1) % (_maxCounter +1);
 		_callback_changestate(_counter);
 	}
@@ -267,7 +269,7 @@ bool gspSwitch::check() {
 
 			_s1 = 0;
 			_switchState=gspSwitch::Off;
-			if (_switchMode == gspSwitch_MODE_PUSHBUTTON_RELEASE_COUNTER_AUTORESET_CB && _counter) {
+			if ((_switchMode == gspSwitch_MODE_PUSHBUTTON_RELEASE_COUNTER_AUTORESET_CB) && _counter) {
 				if (_autoResetCounter++ > gspSwitch_AUTORESET_CAP) {
 					counterReset();
 					_autoResetCounter=0;

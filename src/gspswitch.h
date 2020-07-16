@@ -27,7 +27,7 @@
 #define _SW_BAND_2  16384
 #define _SW_BAND_3  32768
 
-#define gspSwitch_AUTORESET_CAP 1048576
+#define gspSwitch_AUTORESET_CAP 1024
 
 #define gspSwitch_DEBOUNCE_COUNT 1024
     
