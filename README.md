@@ -37,7 +37,7 @@ If you define your switches with "strings" (instead of callback functions) the d
 
 ```
 gspSwitch mySwitchWithStrings(12,"I was turned Off","I was turned On");
-
+```
 This is the format of the constructor when using serial strings on a two-way toggle switch.
 When the switch is turned off, the string "I was turned Off" will be printed on the serial comms interface.
 When the switch is turned on, the string "I was turned On" will be printed on the serial comms interface.
