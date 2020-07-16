@@ -4,6 +4,7 @@
 #include "Arduino.h"
 #include "nonstd.h"
 #include "gspgrouped.h"
+#include "gspswitch_config.h"
 
 #define gspSwitch_MODE_UNCONFIGURED 0
 #define gspSwitch_MODE_SWITCH_CB 1
@@ -27,7 +28,7 @@
 #define _SW_BAND_2  16384
 #define _SW_BAND_3  32768
 
-#define gspSwitch_AUTORESET_CAP 1024
+#define gspSwitch_AUTORESET_CAP 65535
 
 #define gspSwitch_DEBOUNCE_COUNT 1024
     
