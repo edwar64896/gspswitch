@@ -193,7 +193,7 @@ void gspSwitch::counterReset() {
 void gspSwitch::counterIncrement() {
 	if (_switchMode == gspSwitch_MODE_PUSHBUTTON_RELEASE_COUNTER_MANUALRESET_CB || _switchMode == gspSwitch_MODE_PUSHBUTTON_RELEASE_COUNTER_AUTORESET_CB ) {
 		_autoResetCounter=0;
-		_counter = (_counter + 1) % (_maxCounter +1);
+		_counter = (_counter + 1) % _maxCounter;
 		_callback_changestate(_counter);
 	}
 }
