@@ -174,7 +174,6 @@ gspSwitch::gspSwitch(uint8_t pin,
 	uint8_t mode = 0) {
 		_pin = pin;
 		pinMode(_pin, INPUT_PULLUP);
-		_switchMode = mode;
 		_maxCounter = maxStates;
 		_callback_changestate = cb_changestate;
 		switch (mode) {
@@ -186,7 +185,7 @@ gspSwitch::gspSwitch(uint8_t pin,
 				break;
 			default:
 				_switchMode = gspSwitch_MODE_UNCONFIGURED;
-			break;
+				break;
 	}
 	
 }

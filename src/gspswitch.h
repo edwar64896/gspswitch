@@ -99,7 +99,9 @@ class gspSwitch:public gspGrouped
     //    1 - switch pin
     //    2 - max counter states
     //    2 - counter change action (counter sent as parameter)  (fn (uint8_t) callback)
-    //    3 - mode (default gspSwitch_MODE_PUSHBUTTON_RELEASE_COUNTER_MANUALRESET_CB or gspSwitch_MODE_PUSHBUTTON_RELEASE_COUNTER_AUTORESET_CB)
+    //    3 - mode 
+    //      0 = change counter state on push. (autoreset)
+    //      1 = change counter state on push. (manual reset)
     gspSwitch(uint8_t, uint8_t, nonstd::function<void (uint8_t)>, uint8_t = 0);
     
     //resets the counter - only valid with this mode/constructor
