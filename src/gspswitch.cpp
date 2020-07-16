@@ -171,12 +171,24 @@ gspSwitch::gspSwitch(uint8_t pin,
 gspSwitch::gspSwitch(uint8_t pin, 
 	uint8_t maxStates,
 	nonstd::function<void (uint8_t)> cb_changestate,
-	uint8_t mode = gspSwitch_MODE_PUSHBUTTON_RELEASE_COUNTER_MANUALRESET_CB) {
+	uint8_t mode = 0) {
 		_pin = pin;
 		pinMode(_pin, INPUT_PULLUP);
 		_switchMode = mode;
 		_maxCounter = maxStates;
 		_callback_changestate = cb_changestate;
+		switch (mode) {
+			case 0:
+				_switchMode = gspSwitch_MODE_PUSHBUTTON_RELEASE_COUNTER_AUTORESET_CB;
+				break;
+			case 1:
+				_switchMode = gspSwitch_MODE_PUSHBUTTON_RELEASE_COUNTER_MANUALRESET_CB;
+				break;
+			default:
+				_switchMode = gspSwitch_MODE_UNCONFIGURED;
+			break;
+	}
+	
 }
     
     //resets the counter - only valid with this mode/constructor

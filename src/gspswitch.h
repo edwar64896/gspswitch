@@ -35,42 +35,6 @@ class gspSwitch:public gspGrouped
 {
   public:
 
-    static gspSwitch * makeOne(uint8_t _pin, 
-        nonstd::function<void ()> cb1, /*callback to invoke upon successful parse*/
-        nonstd::function<void ()> cb2) /*callback to invoke upon successful parse*/
-	  {
-        gspSwitch * instance = new gspSwitch(_pin,cb1,cb2);
-        gspGrouped::register_instance(instance);
-        return instance;
-    }
-
-    static gspSwitch * makeOne(uint8_t _pin, 
-	    const char * s1, 
-	    const char * s2) 
-	  {
-        gspSwitch * instance = new gspSwitch(_pin,s1,s2);
-        gspGrouped::register_instance(instance);
-        return instance;
-    }
-
-    static gspSwitch * makeOne(uint8_t _pin, 
-        nonstd::function<void ()> cb1, /*callback to invoke upon successful parse*/
-	      uint8_t mode=0) 
-	  {
-        gspSwitch * instance = new gspSwitch(_pin,cb1,mode);
-        gspGrouped::register_instance(instance);
-        return instance;
-    }
-
-    static gspSwitch * makeOne(uint8_t _pin, 
-	      const char * s1,
-        uint8_t mode=0) 
-    {
-        gspSwitch * instance = new gspSwitch(_pin,s1,mode);
-        gspGrouped::register_instance(instance);
-        return instance;
-    }
-
     // constructors for 2-position toggle switches or latching pushbuttons
     // mode = 0 (default) -> two position switch
     // mode = 1 -> latching pushbutton
@@ -136,7 +100,7 @@ class gspSwitch:public gspGrouped
     //    2 - max counter states
     //    2 - counter change action (counter sent as parameter)  (fn (uint8_t) callback)
     //    3 - mode (default gspSwitch_MODE_PUSHBUTTON_RELEASE_COUNTER_MANUALRESET_CB or gspSwitch_MODE_PUSHBUTTON_RELEASE_COUNTER_AUTORESET_CB)
-    gspSwitch(uint8_t, uint8_t, nonstd::function<void (uint8_t)>, uint8_t = gspSwitch_MODE_PUSHBUTTON_RELEASE_COUNTER_MANUALRESET_CB);
+    gspSwitch(uint8_t, uint8_t, nonstd::function<void (uint8_t)>, uint8_t = 0);
     
     //resets the counter - only valid with this mode/constructor
     void counterReset();
