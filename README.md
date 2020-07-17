@@ -46,62 +46,156 @@ the first parameter indicates the pin that will be used for the switch. It is as
 gspSwitch myToggleSwitch(1,"Switch is Off","Switch is On");
 ```
 
-### Constructors
-```
-
-    // constructors for 2-position toggle switches
-    // mode = 0 (default) -> two position switch
-    // mode = 1 -> latching pushbutton
-    //
-    // params: 
-    //    1 - on action
-    //    2 - off action
-    //    3 - mode
-    gspSwitch(uint8_t, nonstd::function<void ()>, nonstd::function<void ()>, uint8_t mode = 0 );
-    gspSwitch(uint8_t, const char *, const char *,uint8_t mode = 0);
-
-    // constructors for momentary pushbutton switches
-    // mode = 0 (default) for "activate once on release"
-    // mode = 1 for "activate once on push"
-    // mode = 2 for "activate continuously on push"
-    //
-    // params: 
-    //    1 - activation action
-    //    2 - mode
-    gspSwitch(uint8_t, nonstd::function<void ()>,uint8_t mode = 0);
-    gspSwitch(uint8_t, const char *,uint8_t mode = 0);
-
-    // mode 3 pushbutton - this is an "activate on release" mode that allows 
-    // use of a pushbutton based on how long the button was down for.
-    //
-    // on/off - very short momentary pushbutton action
-    // alternate mode 1 - button is depressed for 1 second or longer
-    //
-    // params: 
-    //    1 - on action
-    //    2 - off action
-    //    3 - long depress action
-    gspSwitch(uint8_t, nonstd::function<void ()>, nonstd::function<void ()>, nonstd::function<void ()>);
-    gspSwitch(uint8_t, const char *, const char *, const char *);    
 
 
-    // mode 4 pushbutton - this is an "activate on release" mode that allows 
-    // use of a pushbutton based on how long the button was down for.
-    //
-    // on/off - very short momentary pushbutton action
-    // alternate action 1 - button is depressed for 1 second or longer
-    // alternate action 2 - button is depressed for 2 second or longer
-    //
-    // params: 
-    //    1 - on action
-    //    2 - off action
-    //    3 - long depress action
-    //    4 - very long depress action
-    gspSwitch(uint8_t, nonstd::function<void ()>, nonstd::function<void ()>, nonstd::function<void ()>, nonstd::function<void ()>);
-    gspSwitch(uint8_t, const char *, const char *, const char *, const char *);  
+### Components.
 
+gspswitch supports two types of devices : Two-position switches and momentary pushbuttons.
+The type of constructor you will use depends on a number of things:
+
+1. what device you are using
+2. what you want it to do
+
+
+#### Two-Position Toggle Switch
 
 ```
+    // callback mode:
+    gspSwitch  {instancename}({pin}, on_callback_function, off_callback_function );
+
+    // on_callback_function and off_callback_function must follow the following pattern:
+
+    void on_callback_function() {
+      // on actions here
+    }
+
+    void off_callback_function() {
+      // off actions here
+    }
+
+
+    // string mode
+    gspSwitch  {instancename}({pin}, "Turn on Send This", "Turn Off Send This");
+
+```
+
+### Momentary Pushbutton
+
+#### Two State Latching Pushbutton operation:
+
+The two-state latching mechanism is:
+
+1. push once to turn on
+2. push again to turn off.
+
+```
+    // callback mode:
+    gspSwitch  {instancename}({pin}, on_callback_function, off_callback_function , 1 ); /// note mode indicator at the end of the constructor
+
+    // on_callback_function and off_callback_function must follow the following pattern:
+
+    void on_callback_function() {
+      // on actions here
+    }
+
+    void off_callback_function() {
+      // off actions here
+    }
+
+
+    // string mode
+    gspSwitch  {instancename}({pin}, "Turn on Send This", "Turn Off Send This" , 1); /// note mode indicator at the end of the constructor
+
+```
+
+#### Push-To-Activate
+##### Activate-On-Release (Default)
+Function is called (or string is sent) when the button is released after being depressed.
+```
+    // callback mode
+    gspSwitch  {instancename}({pin}, callback_function );
+
+    // string mode
+    gspSwitch  {instancename}({pin}, "Send on Activate" );
+
+```
+##### Activate-On-Push
+Function is called (or string is sent) when the button is depressed.
+```
+    // callback mode
+    gspSwitch  {instancename}({pin}, callback_function, 1 );
+
+    // string mode
+    gspSwitch  {instancename}({pin}, "Send on Activate", 1 );
+
+```
+##### Activate-Continuously-On-Push
+Function is called continuously while the button is pushed.
+```
+    // callback mode
+    gspSwitch  {instancename}({pin}, callback_function, 2 );
+
+    // string mode
+    gspSwitch  {instancename}({pin}, "Send on Activate", 2 );
+
+```
+#### Long-Push Activation
+Short push of the button toggles state on and off.
+Long push of the button activates the 3rd callback/string.
+
+```
+    // callback mode
+    gspSwitch   {instancename}({pin}, callback_function_on, callback_function_off, callback_function_long );
+
+    // string mode
+    gspSwitch   {instancename}({pin}, "On message","Off Message","Long Push Message" );
+
+```
+#### Long-And-Longer-Push Activation
+Short push of the button toggles state on and off.
+Long push of the button activates the 3rd callback/string.
+Very long push of the button (2s or longer) activates the 4th callback/string
+
+```
+    // callback mode
+    gspSwitch   {instancename}({pin}, callback_function_on, callback_function_off, callback_function_long, callback_function_longer ); 
+
+    // string mode
+    gspSwitch   {instancename}({pin}, "On message","Off Message","Long Push Message","Longest Push Message" );
+
+```
+#### multi-state activation
+each push of the pushbutton activates a new 'state'.
+you enumerate the number of states you want when instantiating the component.
+You can either have manual reset of the device or automatic reset.
+Resetting takes the state back to '0' which is the first state.
+
+```
+    // callback mode - Auto Reset
+    gspSwitch   {instancename}({pin}, {nstates}, state_change_callback); 
+
+    // callback mode - Manual Reset
+    gspSwitch   {instancename}({pin}, {nstates}, state_change_callback,1); 
+
+
+    void state_change_callback(uint8_t state) {
+      switch (state) {
+        case 0:
+        break;
+        case 1...
+        case 2..
+        case n...
+      }
+    }
+
+```
+In "AutoReset" mode, call 'counterAutoResetHoldoff();' on the switch instance in order to hold-off the auto-reset operation.
+This can be useful when this device is being used to alter multiple data instances using an encoder.
+
+To reset the state in "Manual" mode, call 'counterReset();' on the switch instance.
+
+To recover the state of the activation, call 'getCounterValue();' on the switch instance.
+
 
 ### Coding Requirements
 
@@ -153,33 +247,6 @@ void loop() {
 }
 
 ```
-## Pushbutton modes
-
-The pushbutton operational modes are configured in the last parameter of the constructor.
-The default mode is "Activate on release". Other optional modes are "Activate once on push" or "Activate continuously on push".
-
-### Activate on release (default)
-When pushed, the button does nothing, however once you release it the callback is invoked once - or the "string" is sent once. This mode is best used to avoid accidental double-taps on the switch.
-
-```
-gspSwitch myPushButton(2 /* pin */,myButtonWasReleased /* callback function */,0 /* mode */);
-gspSwitch myPushButton(2 /* pin */,myButtonWasReleased /* callback function */); //same as above
-```
-
-### Activate once on push (mode param=1)
-When pushed, the callback is invoked once. In order for the callback to be invoked again, the pushbutton must be released.
-```
-gspSwitch myPushButton(2 /* pin */,myButtonWasPushed /* callback function */,1 /* mode */);
-```
-### Activate continuously on push
-When pushed the callback is invoked repeatedly until the pushbutton is released.
-```
-void myButtonIsStillBeingPushed() {
-Serial.println("we will keep on seeing this while the button is being pushed");
-}
-gspSwitch myPushButton(2 /* pin */,myButtonIsStillBeingPushed /* callback function */,2 /* mode */);
-```
-
 ## Debugging
 if you define DEBUG=1 in your build options, the class will provide some basic debugging output on the serial interface with each action.
 
